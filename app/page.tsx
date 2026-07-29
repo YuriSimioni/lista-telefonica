@@ -9,9 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Item,
+  ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
@@ -19,10 +21,14 @@ import {
 import { Label } from "@/components/ui/label";
 import {
   BrushCleaning,
+  Check,
   CircleAlert,
   Phone,
+  Trash,
+  Trash2,
   User,
   UserPlus,
+  UserX,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,24 +41,34 @@ export default function Home() {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [listaTelefonica, setListaTelefonica] = useState<Pessoa[]>([]);
+  
+  const [sucesso, setSucesso] = useState(false);
 
   function adicionar_contato() {
-    // Validação básica para não adicionar campos vazios
     if (!nome || !telefone) return;
 
-    // 3. Criamos o novo objeto do tipo Pessoa
     const novoContato: Pessoa = {
       nome: nome,
       telefone: telefone,
     };
 
-    // 4. Adicionamos o novo contato à lista existente
-    // Usamos o operador spread (...) para manter os contatos anteriores e adicionar o novo
     setListaTelefonica([...listaTelefonica, novoContato]);
+    
+    setSucesso(true);
 
-    // 5. Limpamos os inputs após adicionar
+    setTimeout(() => {
+      setSucesso(false);
+    }, 3000);
+
     setNome("");
     setTelefone("");
+  }
+
+  function deleta_contato(telefoneParaDeletar: string) {
+    if (!telefoneParaDeletar) return;
+
+    // CORREÇÃO: Usar setListaTelefonica para atualizar o estado do React corretamente
+    setListaTelefonica(prevLista => prevLista.filter(pessoa => pessoa.telefone !== telefoneParaDeletar));
   }
 
   return (
@@ -65,7 +81,7 @@ export default function Home() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <form>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="nome">
@@ -73,12 +89,7 @@ export default function Home() {
                   Nome
                 </Label>
                 <Input
-                  id="nome"
-                  type="text"
-                  placeholder="João Silva..."
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required
+                  id="nome" type="text" placeholder="João Silva..." value={nome} onChange={(e) => setNome(e.target.value)} required
                 />
               </div>
               <div className="grid gap-2">
@@ -87,35 +98,31 @@ export default function Home() {
                   Telefone
                 </Label>
                 <Input
-                  id="telefone"
-                  type="text"
-                  placeholder="(00) 12345-6789"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  required
+                  id="telefone" type="text" placeholder="(00) 12345-6789" value={telefone} onChange={(e) => setTelefone(e.target.value)} required
                 />
               </div>
             </div>
           </form>
         </CardContent>
         <CardFooter className="w-full flex-row gap-2">
-          <Button type="submit" className="w-1/2" onClick={adicionar_contato}>
+          <Button type="button" className="w-1/2" onClick={adicionar_contato}>
             <UserPlus size={20} />
             Cadastrar
           </Button>
-          <Button type="reset" className="w-1/2" variant="secondary">
+          <Button type="reset" className="w-1/2" variant="secondary" onClick={() => { setNome(""); setTelefone(""); }}>
             <BrushCleaning size={20} />
             Limpar
           </Button>
         </CardFooter>
       </Card>
+      
       <Card className="w-1/4">
         <CardHeader>
-          <CardTitle>Contato salvos</CardTitle>
+          <CardTitle>Contatos salvos</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3">
           {listaTelefonica.length === 0 ? (
-            <Alert variant="destructive">
+            <Alert variant="default">
               <CircleAlert />
               <AlertTitle>Contato não cadastrados</AlertTitle>
               <AlertDescription>
@@ -123,26 +130,52 @@ export default function Home() {
               </AlertDescription>
             </Alert>
           ) : (
-            listaTelefonica.map((pessoa, index) => (
-              <Item variant={"outline"} key={index} size="default">
-                <ItemContent>
-                  <ItemTitle>
-                    <User size={16} />
-                    {pessoa.nome}
-                  </ItemTitle>
-                  <ItemDescription>{pessoa.telefone}</ItemDescription>
-                </ItemContent>
-                {/*<ItemActions>
-                  <Button variant="ghost" size="icon-sm">
-                    <Copy />
-                  </Button>
-                </ItemActions>
-                */}
-              </Item>
-            ))
+            listaTelefonica.map((pessoa, index) => {
+              return (
+                <Item variant={"outline"} key={index} size="default">
+                  <ItemContent>
+                    <ItemTitle>
+                      <User size={16} />
+                      {pessoa.nome}
+                    </ItemTitle>
+                    <ItemDescription>{pessoa.telefone}</ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    {/* CORREÇÃO: Adicionado o onClick chamando a função com o telefone */}
+                    <Dialog>
+                      <DialogTrigger render={<Button variant={"outline"}><Trash2></Trash2></Button>}></DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle className='flex gap-3 items-center'>
+                            <UserX size={18}/>
+                            Excluir contato
+                          </DialogTitle>
+                          <DialogDescription>
+                            Deseja realmente excluir o contato: <strong>{pessoa.nome}</strong>
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <DialogClose render={<Button variant="outline">Cancel</Button>} />
+                          <Button variant="destructive" onClick={() => {
+                            deleta_contato(pessoa.telefone)
+                          }}>Confirm</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </ItemActions>
+                </Item>
+              );
+            })
           )}
         </CardContent>
       </Card>
+      {sucesso && (
+        <Alert className="w-fit absolute bottom-10 right-10">
+          <Check/>
+          <AlertTitle>Sucesso!</AlertTitle>
+          <AlertDescription>Contato cadastrado com sucesso.</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
