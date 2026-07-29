@@ -1,65 +1,148 @@
-import Image from "next/image";
+"use client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/components/ui/item";
+import { Label } from "@/components/ui/label";
+import {
+  BrushCleaning,
+  CircleAlert,
+  Phone,
+  User,
+  UserPlus,
+} from "lucide-react";
+import { useState } from "react";
+
+interface Pessoa {
+  nome: string;
+  telefone: string;
+}
 
 export default function Home() {
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [listaTelefonica, setListaTelefonica] = useState<Pessoa[]>([]);
+
+  function adicionar_contato() {
+    // Validação básica para não adicionar campos vazios
+    if (!nome || !telefone) return;
+
+    // 3. Criamos o novo objeto do tipo Pessoa
+    const novoContato: Pessoa = {
+      nome: nome,
+      telefone: telefone,
+    };
+
+    // 4. Adicionamos o novo contato à lista existente
+    // Usamos o operador spread (...) para manter os contatos anteriores e adicionar o novo
+    setListaTelefonica([...listaTelefonica, novoContato]);
+
+    // 5. Limpamos os inputs após adicionar
+    setNome("");
+    setTelefone("");
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="flex flex-col gap-10 items-center justify-center w-screen h-screen">
+      <Card className="w-1/4 h-fit">
+        <CardHeader>
+          <CardTitle>Lista Telefônica</CardTitle>
+          <CardDescription>
+            Cadastre um novo contato em sua lista telefônica
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <form>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="nome">
+                  <User size={20} />
+                  Nome
+                </Label>
+                <Input
+                  id="nome"
+                  type="text"
+                  placeholder="João Silva..."
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="telefone">
+                  <Phone size={20} />
+                  Telefone
+                </Label>
+                <Input
+                  id="telefone"
+                  type="text"
+                  placeholder="(00) 12345-6789"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter className="w-full flex-row gap-2">
+          <Button type="submit" className="w-1/2" onClick={adicionar_contato}>
+            <UserPlus size={20} />
+            Cadastrar
+          </Button>
+          <Button type="reset" className="w-1/2" variant="secondary">
+            <BrushCleaning size={20} />
+            Limpar
+          </Button>
+        </CardFooter>
+      </Card>
+      <Card className="w-1/4">
+        <CardHeader>
+          <CardTitle>Contato salvos</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          {listaTelefonica.length === 0 ? (
+            <Alert variant="destructive">
+              <CircleAlert />
+              <AlertTitle>Contato não cadastrados</AlertTitle>
+              <AlertDescription>
+                Comece cadastrando seu primeiro contato na lista
+              </AlertDescription>
+            </Alert>
+          ) : (
+            listaTelefonica.map((pessoa, index) => (
+              <Item variant={"outline"} key={index} size="default">
+                <ItemContent>
+                  <ItemTitle>
+                    <User size={16} />
+                    {pessoa.nome}
+                  </ItemTitle>
+                  <ItemDescription>{pessoa.telefone}</ItemDescription>
+                </ItemContent>
+                {/*<ItemActions>
+                  <Button variant="ghost" size="icon-sm">
+                    <Copy />
+                  </Button>
+                </ItemActions>
+                */}
+              </Item>
+            ))
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
